@@ -9,31 +9,32 @@ metadata:
 spec:
   containers:
     - name: todoapp-container
-      image: {your-dockerhub-username}/todoapp:3.0.0 # Виправлено: Узгоджено з інструкціями
+      # Використовуємо ваш логін
+      image: langrafka/todoapp:3.0.0
       imagePullPolicy: Always
       ports:
-        - containerPort: 8080
+        - containerPort: 8000 
       env:
         # Критичні Django ENVS (Task 6)
         - name: SECRET_KEY
-          value: "insecure-secret-key-for-dev" # Потрібно для запуску Django
+          value: "insecure-secret-key-for-dev"
         - name: ALLOWED_HOSTS
-          value: "*" # Дозволяємо доступ з будь-якого хоста в кластері
+          value: "*"
         # Проби та логування
         - name: PYTHONUNBUFFERED
           value: "1"
-        - name: READINESS_DELAY
+        - name: READINESS_DELAY 
           value: "10"
       livenessProbe:
         httpGet:
           path: /api/liveness/
-          port: 8080
+          port: 8000
         initialDelaySeconds: 10
         periodSeconds: 5
       readinessProbe:
         httpGet:
           path: /api/readiness/
-          port: 8080
+          port: 8000
         initialDelaySeconds: 12 
         periodSeconds: 5
 ---
@@ -48,10 +49,11 @@ metadata:
 spec:
   containers:
     - name: todoapp-container
-      image: {your-dockerhub-username}/todoapp:3.0.0 # Виправлено: Узгоджено з інструкціями
+      # Використовуємо ваш логін
+      image: langrafka/todoapp:3.0.0
       imagePullPolicy: Always
       ports:
-        - containerPort: 8080
+        - containerPort: 8000 
       env:
         # Критичні Django ENVS (Task 6)
         - name: SECRET_KEY
@@ -66,12 +68,12 @@ spec:
       livenessProbe:
         httpGet:
           path: /api/liveness/
-          port: 8080
+          port: 8000
         initialDelaySeconds: 10
         periodSeconds: 5
       readinessProbe:
         httpGet:
           path: /api/readiness/
-          port: 8080
+          port: 8000
         initialDelaySeconds: 12
         periodSeconds: 5

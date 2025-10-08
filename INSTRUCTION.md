@@ -1,25 +1,23 @@
-## Інструкція з валідації ToDo App у Kubernetes (Task 3)
+## Інструкція з валідації ToDo App у Kubernetes
 
 Ця інструкція показує, як розгорнути та протестувати додаток, використовуючи створені маніфести.
 
 ### 1. Збірка та Публікація Образу (Критично)
 
-Обов'язково виконайте ці команди. **ЗАМІНІТЬ** плейсхолдер **`{your-dockerhub-username}`** на ваш фактичний логін Docker Hub у командах нижче, а також у файлі `todoapp-pods.yml`.
+Для цього проєкту використовується ваш Docker Hub логін **`langrafka`**.
 
-1.  **Зібрати образ:**
+1.  **Зібрати образ під правильним тегом:**
     ```bash
-    docker build . -t {your-dockerhub-username}/todoapp:3.0.0
+    docker build . -t langrafka/todoapp:3.0.0
     ```
 2.  **Завантажити образ на Docker Hub:**
     ```bash
-    docker push {your-dockerhub-username}/todoapp:3.0.0
+    docker push langrafka/todoapp:3.0.0
     ```
 
 ---
 
 ### 2. Застосування маніфестів
-
-Усі маніфести знаходяться у вашій робочій директорії. Застосовуйте їх по черзі:
 
 1.  **Створити простір імен `todoapp`:**
     ```bash
@@ -43,6 +41,10 @@
     kubectl get pods -n todoapp
     kubectl get svc -n todoapp
     ```
+    *Очікуваний статус Pod-ів: `Running`.*
+
+**Примітка щодо конфігурації Django:**
+Додаток використовує вбудовану базу даних SQLite, тому не потрібні змінні середовища для зовнішньої бази даних. Проби налаштовані так, що `readinessProbe.initialDelaySeconds` (12с) є трохи більшим, ніж `READINESS_DELAY` (10с) додатка, для надійної ініціалізації.
 
 ---
 
@@ -61,13 +63,12 @@
 
 #### B. Тестування ClusterIP DNS всередині кластера (Task 8)
 
-**Важливо:** Оскільки образ BusyBox не містить `curl`, ми використовуємо `wget`.
-
 1.  **Зайти всередину контейнера busybox:**
     ```bash
     kubectl exec -it busybox -n todoapp -- /bin/sh
     ```
 2.  **Всередині busybox (виконати wget до DNS-імені ClusterIP):**
+    *Використовуємо повне DNS-ім'я: `<service-name>.<namespace>.svc.cluster.local`.*
     ```bash
     wget -qO- [http://todoapp-clusterip-svc.todoapp.svc.cluster.local/](http://todoapp-clusterip-svc.todoapp.svc.cluster.local/)
     ```
@@ -81,10 +82,19 @@
 1.  **Перевірити виділений порт:**
     ```bash
     kubectl get svc todoapp-nodeport-svc -n todoapp
-    # Знайдіть NodePort (наприклад, 30007)
+    # Знайдіть NodePort (наприклад, 30007).
     ```
 2.  **Звернутися до додатка ззовні кластера:**
     ```bash
     # Для локальних кластерів (Docker Desktop, Minikube):
     curl http://localhost:30007/
+    ```
+    **Для віддалених/багатонодових кластерів:**
+    Щоб знайти IP-адресу вузла, виконайте:
+    ```bash
+    kubectl get nodes -o wide
+    ```
+    Потім отримайте доступ за адресою:
+    ```bash
+    curl http://<NODE_IP>:<NODEPORT>/
     ```
