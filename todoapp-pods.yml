@@ -1,3 +1,4 @@
+# Pod 1: todoapp-1
 apiVersion: v1
 kind: Pod
 metadata:
@@ -8,11 +9,17 @@ metadata:
 spec:
   containers:
     - name: todoapp-container
-      image: langrafka/todoapp:3.0.0
+      image: {your-dockerhub-username}/todoapp:3.0.0 # Виправлено: Узгоджено з інструкціями
       imagePullPolicy: Always
       ports:
         - containerPort: 8080
       env:
+        # Критичні Django ENVS (Task 6)
+        - name: SECRET_KEY
+          value: "insecure-secret-key-for-dev" # Потрібно для запуску Django
+        - name: ALLOWED_HOSTS
+          value: "*" # Дозволяємо доступ з будь-якого хоста в кластері
+        # Проби та логування
         - name: PYTHONUNBUFFERED
           value: "1"
         - name: READINESS_DELAY
@@ -30,6 +37,7 @@ spec:
         initialDelaySeconds: 12 
         periodSeconds: 5
 ---
+# Pod 2: todoapp-2
 apiVersion: v1
 kind: Pod
 metadata:
@@ -40,11 +48,17 @@ metadata:
 spec:
   containers:
     - name: todoapp-container
-      image: langrafka/todoapp:3.0.0
+      image: {your-dockerhub-username}/todoapp:3.0.0 # Виправлено: Узгоджено з інструкціями
       imagePullPolicy: Always
       ports:
         - containerPort: 8080
       env:
+        # Критичні Django ENVS (Task 6)
+        - name: SECRET_KEY
+          value: "insecure-secret-key-for-dev"
+        - name: ALLOWED_HOSTS
+          value: "*"
+        # Проби та логування
         - name: PYTHONUNBUFFERED
           value: "1"
         - name: READINESS_DELAY

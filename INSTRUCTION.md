@@ -4,7 +4,7 @@
 
 ### 1. Збірка та Публікація Образу (Критично)
 
-Обов'язково виконайте ці команди, використовуючи ваш логін **{your-dockerhub-username}** (наприклад, `langrafka`):
+Обов'язково виконайте ці команди. **ЗАМІНІТЬ** плейсхолдер **`{your-dockerhub-username}`** на ваш фактичний логін Docker Hub у командах нижче, а також у файлі `todoapp-pods.yml`.
 
 1.  **Зібрати образ:**
     ```bash
@@ -43,7 +43,6 @@
     kubectl get pods -n todoapp
     kubectl get svc -n todoapp
     ```
-    *Очікуваний статус Pod-ів: `Running`.*
 
 ---
 
@@ -51,10 +50,7 @@
 
 #### A. Тестування ClusterIP Service через `port-forward` (Task 9)
 
-Цей метод використовує **Service `port-forward`**, щоб прокинути внутрішній ClusterIP на локальний порт для тестування з вашої машини.
-
 1.  **Прокинути порт 8080 локально (залишити термінал відкритим):**
-    *Прокидаємо порт **80** сервісу `todoapp-clusterip-svc` на локальний порт **8080**.*
     ```bash
     kubectl port-forward service/todoapp-clusterip-svc 8080:80 -n todoapp
     ```
@@ -62,22 +58,18 @@
     ```bash
     curl http://localhost:8080/
     ```
-    *Кожен запит буде балансуватися між Pod-ами `todoapp-1` та `todoapp-2`.*
 
 #### B. Тестування ClusterIP DNS всередині кластера (Task 8)
 
-Цей метод імітує комунікацію між подами, використовуючи **DNS-ім'я** сервісу з контейнера `busybox`.
+**Важливо:** Оскільки образ BusyBox не містить `curl`, ми використовуємо `wget`.
 
 1.  **Зайти всередину контейнера busybox:**
     ```bash
     kubectl exec -it busybox -n todoapp -- /bin/sh
     ```
-2.  **Всередині busybox (виконати curl до DNS-імені ClusterIP):**
-    *Використовуємо повне DNS-ім'я: `<service-name>.<namespace>.svc.cluster.local`.*
+2.  **Всередині busybox (виконати wget до DNS-імені ClusterIP):**
     ```bash
-    curl [http://todoapp-clusterip-svc.todoapp.svc.cluster.local/](http://todoapp-clusterip-svc.todoapp.svc.cluster.local/)
-    # Або скорочене ім'я, яке теж працює:
-    # curl [http://todoapp-clusterip-svc.todoapp/](http://todoapp-clusterip-svc.todoapp/)
+    wget -qO- [http://todoapp-clusterip-svc.todoapp.svc.cluster.local/](http://todoapp-clusterip-svc.todoapp.svc.cluster.local/)
     ```
 3.  **Вийти з busybox:**
     ```bash
@@ -86,18 +78,13 @@
 
 #### C. Тестування через NodePort Service (Task 10)
 
-NodePort відкриває додаток на всіх вузлах кластера, забезпечуючи зовнішній доступ.
-
 1.  **Перевірити виділений порт:**
     ```bash
     kubectl get svc todoapp-nodeport-svc -n todoapp
-    # Знайдіть порт у колонці PORT(S). Наприклад, 80:30007/TCP. 
-    # NodePort у цьому випадку - 30007.
+    # Знайдіть NodePort (наприклад, 30007)
     ```
 2.  **Звернутися до додатка ззовні кластера:**
     ```bash
     # Для локальних кластерів (Docker Desktop, Minikube):
     curl http://localhost:30007/
-    # Для віддалених кластерів використовуйте IP вузла:
-    # curl http://<IP_вашого_вузла>:30007/
     ```
